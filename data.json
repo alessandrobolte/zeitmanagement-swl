@@ -28,8 +28,9 @@
         {
           "id": "s6b5nr1",
           "start": 1760450138990,
-          "end": null,
-          "durationMin": null
+          "end": 1760450142912,
+          "durationMin": 1,
+          "note": "test4"
         }
       ]
     },
@@ -39,9 +40,6 @@
       "sessions": []
     }
   ],
-  "active": {
-    "categoryId": "xolsr2h",
-    "start": 1760450138990
-  },
+  "active": null,
   "theme": "dark"
 }
