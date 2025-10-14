@@ -1,5 +1,47 @@
 {
-  "categories": [],
-  "active": null,
-  "theme": "light"
+  "categories": [
+    {
+      "id": "xolsr2h",
+      "name": "LemGOesHANA",
+      "sessions": [
+        {
+          "id": "3pnsgjv",
+          "start": 1760438281950,
+          "end": 1760438289504,
+          "durationMin": 1,
+          "note": "Test"
+        },
+        {
+          "id": "ay9ij3m",
+          "start": 1760449686571,
+          "end": 1760449691205,
+          "durationMin": 1,
+          "note": ""
+        },
+        {
+          "id": "zr9ru4v",
+          "start": 1760449954170,
+          "end": 1760449957281,
+          "durationMin": 1,
+          "note": "test3"
+        },
+        {
+          "id": "s6b5nr1",
+          "start": 1760450138990,
+          "end": null,
+          "durationMin": null
+        }
+      ]
+    },
+    {
+      "id": "cjbrnhe",
+      "name": "M365",
+      "sessions": []
+    }
+  ],
+  "active": {
+    "categoryId": "xolsr2h",
+    "start": 1760450138990
+  },
+  "theme": "dark"
 }
