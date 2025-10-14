@@ -31,15 +31,32 @@
           "end": 1760450142912,
           "durationMin": 1,
           "note": "test4"
+        },
+        {
+          "id": "6u1ge0u",
+          "start": 1760451025498,
+          "end": 1760451027416,
+          "durationMin": 1,
+          "note": "test5"
         }
       ]
     },
     {
       "id": "cjbrnhe",
       "name": "M365",
-      "sessions": []
+      "sessions": [
+        {
+          "id": "ijfazlq",
+          "start": 1760451191125,
+          "end": null,
+          "durationMin": null
+        }
+      ]
     }
   ],
-  "active": null,
+  "active": {
+    "categoryId": "cjbrnhe",
+    "start": 1760451191125
+  },
   "theme": "dark"
 }
