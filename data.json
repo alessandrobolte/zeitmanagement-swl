@@ -48,15 +48,13 @@
         {
           "id": "ijfazlq",
           "start": 1760451191125,
-          "end": null,
-          "durationMin": null
+          "end": 1760451196948,
+          "durationMin": 1,
+          "note": "test2"
         }
       ]
     }
   ],
-  "active": {
-    "categoryId": "cjbrnhe",
-    "start": 1760451191125
-  },
+  "active": null,
   "theme": "dark"
 }
