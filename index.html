@@ -425,7 +425,7 @@ async function save() {
     localStorage.setItem(LS_THEME, state.theme || "light");
 
     // 🔹 Cloud-Sync mit Netlify → GitHub
-    const res = await fetch("/functions/saveData") {
+    const res = await fetch("/functions/saveData", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -434,14 +434,8 @@ async function save() {
         theme: state.theme || "light"
       })
     });
-
-    if (!res.ok) {
-      console.error(`❌ Cloud-Sync fehlgeschlagen: ${res.status}`);
-    } else {
-      console.log(`✅ Cloud-Sync erfolgreich (${state.theme})`);
-    }
   } catch (e) {
-    console.warn("⚠️ Fehler beim Speichern:", e);
+    console.warn("Cloud-Sync fehlgeschlagen:", e);
   }
 }
   function ensure(){ state.categories = state.categories || []; state.active = state.active || null; state.theme = state.theme || 'light'; state.categories.forEach(c=> c.sessions = c.sessions || []); }
@@ -885,5 +879,6 @@ if(start) cat.sessions.push({id:uid(), start, end, durationMin: dur, note});
 </script>
 </body>
 </html>
+
 
 
