@@ -1,0 +1,10 @@
+{
+  "name": "zeitmanagement-app",
+  "version": "1.0.0",
+  "description": "Zeitmanagement App mit Netlify Functions",
+  "main": "index.html",
+  "scripts": {},
+  "dependencies": {
+    "node-fetch": "^3.3.2"
+  }
+}
