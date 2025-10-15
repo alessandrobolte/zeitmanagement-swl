@@ -1,3 +1,3 @@
-// _worker.js – aktiviert Pages Functions Routing
-import worker from './functions/[[path]].js';
+// _worker.js
+import worker from './functions/_middleware.js';
 export default worker;
