@@ -6,4 +6,4 @@ export async function onRequest(context) {
   if (url.pathname.endsWith('/functions/loadData')) return loadData(context);
   if (url.pathname.endsWith('/functions/saveData')) return saveData(context);
   return new Response('Not found', { status: 404 });
-}
+ }
