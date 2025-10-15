@@ -258,7 +258,7 @@ async function load() {
   loadingEl.style.opacity = 1;
 
   try {
-    const res = await fetch("/.netlify/functions/loadData");
+    const res = await fetch("/functions/loadData");
     if (res.ok) {
       const remoteData = await res.json();
       if (remoteData && typeof remoteData === "object") {
@@ -425,7 +425,7 @@ async function save() {
     localStorage.setItem(LS_THEME, state.theme || "light");
 
     // 🔹 Cloud-Sync mit Netlify → GitHub
-    const res = await fetch("/.netlify/functions/saveData", {
+    const res = await fetch("/functions/saveData"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -885,3 +885,4 @@ if(start) cat.sessions.push({id:uid(), start, end, durationMin: dur, note});
 </script>
 </body>
 </html>
+
