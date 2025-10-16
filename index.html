@@ -1,521 +1,313 @@
 <!doctype html>
 <html lang="de">
 <head>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🕒</text></svg>">
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Zeitmanagement</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🕒</text></svg>">
 <style>
-  :root{
-    --bg:#f3f4f6;
-    --panel:#ffffff;
-    --text:#0b1220;
-    --muted:#425066;
-    --accent1:#28a745;
-    --accent2:#3b82f6;
-    --radius:12px;
-    --shadow: 0 8px 24px rgba(15,23,42,0.06);
-  }
-  :root.dark{
-    --bg:#0b0b0c;
-    --panel:#0f1112;
-    --text:#e8e8e8;
-    --muted:#9aa0a6;
-    --accent1:#ff4d4f;
-    --accent2:#ff902b;
-    --shadow: 0 8px 28px rgba(0,0,0,0.6);
-  }
-
-  *{box-sizing:border-box}
-  html,body{height:100%}
-  body{
-    margin:0;
-    font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;
-    background:var(--bg);
-    color:var(--text);
-    -webkit-font-smoothing:antialiased;
-    -moz-osx-font-smoothing:grayscale;
-    padding:20px;
-    display:flex;
-    justify-content:center;
-  }
-
-  .app{width:100%;max-width:1100px;}
-  header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
-  h1{margin:0;font-size:1.6rem}
-  .top-controls{display:flex;gap:10px;align-items:center}
-  button{background:var(--panel);border:1px solid rgba(0,0,0,0.06);color:var(--text);padding:8px 12px;border-radius:10px;cursor:pointer;box-shadow:var(--shadow)}
-  .small{padding:6px 10px;font-size:0.9rem}
-  .ghost{background:transparent}
-  .accent{background:linear-gradient(90deg,var(--accent1),var(--accent2));border:none;color:#fff}
-  .danger{background:transparent;border:1px solid var(--accent1);color:var(--accent1)}
-
-  .top{display:flex;gap:16px;align-items:flex-start}
-  .cats-panel{flex:1;background:var(--panel);padding:16px;border-radius:var(--radius)}
-  .timer-panel{width:360px;min-width:260px;background:var(--panel);padding:18px;border-radius:var(--radius);display:flex;flex-direction:column;align-items:center;gap:10px}
-
-  .category-list{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
-  .category-card{padding:10px 12px;border-radius:10px;background:linear-gradient(90deg, rgba(0,0,0,0.02), transparent);display:flex;align-items:center;gap:12px;border:1px solid rgba(0,0,0,0.04)}
-  .category-name{font-weight:700}
-  .category-meta{font-size:0.85rem;color:var(--muted)}
-
-  .time-big{font-size:2.2rem;font-weight:800}
-  .timer-controls{display:flex;gap:8px;margin-top:8px}
-  select,input{padding:8px;border-radius:8px;border:1px solid rgba(0,0,0,0.06);background:transparent;color:var(--text)}
-  input[type="number"]{width:80px}
-
-  .actions-row{display:flex;gap:8px;align-items:center;margin-top:12px}
-  .centered{display:flex;justify-content:center}
-
-  .stats-panel{background:var(--panel);padding:14px;border-radius:var(--radius);margin-top:14px}
-  .stats-header{display:flex;align-items:center;justify-content:space-between}
-  .toggle-details{cursor:pointer;color:var(--muted);font-size:0.95rem}
-  .charts{display:grid;grid-template-columns:1fr 420px;gap:12px;margin-top:12px}
-  canvas{background:linear-gradient(180deg, rgba(0,0,0,0.02), transparent);border-radius:10px;padding:8px}
-  table{width:100%;border-collapse:collapse;margin-top:10px}
-  th,td{padding:8px 6px;text-align:left;border-bottom:1px dashed rgba(0,0,0,0.06)}
-  .sessions-list{max-height:220px;overflow:auto}
-
-  .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:flex;align-items:center;justify-content:center;z-index:9999}
-  .modal{background:var(--panel);padding:18px;border-radius:12px;min-width:320px;max-width:720px}
-  .form-row{display:flex;gap:8px;margin-bottom:8px}
-  label{font-size:0.9rem;color:var(--muted);min-width:120px;display:inline-block}
-
-  @media (max-width:980px){ .charts{grid-template-columns:1fr} .timer-panel{width:100%} .top{flex-direction:column} }
-
-  .tooltip{position:absolute;padding:6px 8px;border-radius:6px;background:var(--panel);border:1px solid rgba(0,0,0,0.06);pointer-events:none;font-size:0.9rem;z-index:10000}
-  /* Sanftes Pulsieren während des Ladens */
-@keyframes pulse {
-  0% { opacity: 0.5; }
-  50% { opacity: 1; }
-  100% { opacity: 0.5; }
+:root{
+  --bg:#f3f4f6; --panel:#ffffff; --text:#0b1220; --muted:#425066;
+  --accent1:#28a745; --accent2:#3b82f6; --radius:12px; --shadow:0 8px 24px rgba(15,23,42,0.06);
+}
+:root.dark{
+  --bg:#0b0b0c; --panel:#0f1112; --text:#e8e8e8; --muted:#9aa0a6;
+  --accent1:#ff4d4f; --accent2:#ff902b; --shadow:0 8px 28px rgba(0,0,0,0.6);
 }
 
-/* Sanftes Ausblenden */
-.fade-out {
-  opacity: 0;
-  transition: opacity 0.4s ease;
-}
-#toast.show {
-  display: block !important;
-  opacity: 1 !important;
-}
-/* Toast-Styling mit Theme-Anpassung */
-#toast {
-  z-index: 9999;
-  backdrop-filter: blur(6px);
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;
+  background:var(--bg); color:var(--text); padding:20px;
+  display:flex; justify-content:center; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
 }
 
-:root:not(.dark) #toast {
-  background: #0077cc; /* kräftiges Blau im Lightmode */
-  color: white;
+.app{width:100%;max-width:1100px;}
+header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+h1{margin:0;font-size:1.6rem}
+.top-controls{display:flex;gap:10px;align-items:center}
+button{
+  background:var(--panel); border:1px solid rgba(0,0,0,0.06); color:var(--text);
+  padding:8px 12px; border-radius:10px; cursor:pointer; box-shadow:var(--shadow);
 }
+.small{padding:6px 10px;font-size:0.9rem}
+.ghost{background:transparent}
+.accent{background:linear-gradient(90deg,var(--accent1),var(--accent2));border:none;color:#fff}
+.danger{background:transparent;border:1px solid var(--accent1);color:var(--accent1)}
 
-.dark #toast {
-  background: #ff6600; /* warmes Orange im Darkmode */
-  color: #fff;
-}
+.top{display:flex;gap:16px;align-items:flex-start}
+.cats-panel{flex:1;background:var(--panel);padding:16px;border-radius:var(--radius)}
+.timer-panel{width:360px;min-width:260px;background:var(--panel);padding:18px;border-radius:var(--radius);display:flex;flex-direction:column;align-items:center;gap:10px}
+
+.category-list{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+.category-card{padding:10px 12px;border-radius:10px;background:linear-gradient(90deg, rgba(0,0,0,0.02), transparent);display:flex;align-items:center;gap:12px;border:1px solid rgba(0,0,0,0.04)}
+.category-name{font-weight:700}
+.category-meta{font-size:0.85rem;color:var(--muted)}
+
+.time-big{font-size:2.2rem;font-weight:800}
+.timer-controls{display:flex;gap:8px;margin-top:8px}
+select,input{padding:8px;border-radius:8px;border:1px solid rgba(0,0,0,0.06);background:transparent;color:var(--text)}
+input[type="number"]{width:80px}
+
+.actions-row{display:flex;gap:8px;align-items:center;margin-top:12px}
+.centered{display:flex;justify-content:center}
+
+.stats-panel{background:var(--panel);padding:14px;border-radius:var(--radius);margin-top:14px}
+.stats-header{display:flex;align-items:center;justify-content:space-between}
+.toggle-details{cursor:pointer;color:var(--muted);font-size:0.95rem}
+.charts{display:grid;grid-template-columns:1fr 420px;gap:12px;margin-top:12px}
+canvas{background:linear-gradient(180deg, rgba(0,0,0,0.02), transparent);border-radius:10px;padding:8px}
+table{width:100%;border-collapse:collapse;margin-top:10px}
+th,td{padding:8px 6px;text-align:left;border-bottom:1px dashed rgba(0,0,0,0.06)}
+.sessions-list{max-height:220px;overflow:auto}
+
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:flex;align-items:center;justify-content:center;z-index:9999}
+.modal{background:var(--panel);padding:18px;border-radius:12px;min-width:320px;max-width:720px}
+.form-row{display:flex;gap:8px;margin-bottom:8px}
+label{font-size:0.9rem;color:var(--muted);min-width:120px;display:inline-block}
+
+@media (max-width:980px){ .charts{grid-template-columns:1fr} .timer-panel{width:100%} .top{flex-direction:column} }
+
+.tooltip{position:absolute;padding:6px 8px;border-radius:6px;background:var(--panel);border:1px solid rgba(0,0,0,0.06);pointer-events:none;font-size:0.9rem;z-index:10000}
+
+/* Ladeanzeige */
+@keyframes pulse {0%{opacity:0.5}50%{opacity:1}100%{opacity:0.5}}
+.fade-out{opacity:0;transition:opacity 0.4s ease;}
+#toast.show{display:block !important;opacity:1 !important;}
+:root:not(.dark) #toast{background:#0077cc;color:white;}
+.dark #toast{background:#ff6600;color:#fff;}
 </style>
 </head>
 <body>
-  <div class="app" id="app">
-    <header>
-	<!-- Ladeanzeige -->
-<div id="loading"
-     style="display:none;
-            text-align:center;
-            font-weight:500;
-            margin-top:10px;
-            color:var(--accent);
-            opacity:0;
-            transition:opacity 0.4s ease;">
-  ⏳ Lade Daten …
+<div class="app" id="app">
+<header>
+<h1>Zeitmanagement</h1>
+<div class="top-controls">
+<button id="modeToggle" class="small" title="Toggle Theme">☀️</button>
+<button id="logoutBtn" class="small" title="Logout">🔒 Logout</button>
 </div>
-<!-- Erfolgsmeldung -->
-<div id="toast"
-     style="display:none;
-            position:fixed;
-            top:20px;
-            right:20px;
-            background:var(--accent);
-            color:white;
-            padding:10px 16px;
-            border-radius:8px;
-            font-weight:500;
-            box-shadow:0 2px 10px rgba(0,0,0,0.2);
-            opacity:0;
-            transition:opacity 0.4s ease;">
-  Daten neu geladen ✅
-</div>
-      <h1>Zeitmanagement</h1>
-      <div class="top-controls">
-        <button id="modeToggle" class="small" title="Toggle Theme">☀️</button>
-		<button id="logoutBtn" class="small ghost">Logout</button>
-      </div>
-    </header>
+</header>
 
-    <div class="top">
-      <section class="cats-panel" aria-labelledby="catsTitle">
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <div style="display:flex;gap:8px;align-items:center">
-            <button id="addCategoryBtn" class="accent small" aria-label="Kategorie hinzufügen">Kategorie hinzufügen</button>
-            <button id="delModeBtn" class="ghost small" aria-pressed="false" title="In den Lösch-Modus wechseln">Löschen</button>
-          </div>
-          <div style="text-align:right">
-            <div id="catsTitle" style="font-size:0.9rem;color:var(--muted)">Kategorien</div>
-          </div>
-        </div>
-
-        <div class="category-list" id="categoryList" aria-live="polite" style="margin-top:12px"></div>
-
-        <div class="actions-row" style="margin-top:12px">
-          <input type="file" id="importFile" accept=".csv,text/csv" style="display:none" aria-hidden="true" />
-          <button id="exportBtn" class="small ghost" title="Export als CSV">Export (CSV)</button>
-          <button id="importBtn" class="small ghost" title="Import aus CSV">Import</button>
-		  <button id="refreshBtn" class="small ghost" title="Daten neu laden">🔄 Refresh</button>
-          <button id="resetBtn" class="small danger" title="Reset Optionen">Reset</button>
-        </div>
-
-        <div class="centered" style="margin-top:10px">
-          <button id="forgotBtn" class="accent" style="white-space:nowrap">Zeit stoppen vergessen?</button>
-        </div>
-      </section>
-
-      <aside class="timer-panel" aria-label="Timer Panel">
-        <div style="font-size:0.9rem;color:var(--muted)">Aktueller Timer</div>
-        <div class="time-big" id="activeTimerDisplay">--:--:--</div>
-        <div style="width:100%;display:flex;gap:8px;align-items:center">
-          <label for="activeCategorySelect" style="min-width:110px;color:var(--muted)">Kategorie</label>
-          <select id="activeCategorySelect" aria-label="Aktive Kategorie" style="flex:1"></select>
-        </div>
-        <div class="timer-controls" style="width:100%;justify-content:center">
-          <button id="startBtn" class="small">Start</button>
-          <button id="stopBtn" class="small">Stop</button>
-        </div>
-        <div style="font-size:0.9rem;color:var(--muted);text-align:center;margin-top:6px">Timer läuft auch nach Reload weiter</div>
-      </aside>
-    </div>
-
-    <section class="stats-panel" id="statsPanel" aria-labelledby="statsTitle">
-      <div class="stats-header">
-        <div style="display:flex;gap:10px;align-items:center">
-          <div id="statsTitle" style="font-weight:700">Statistiken</div>
-          <div id="rangeButtons" style="display:flex;gap:6px">
-            <button class="small" data-range="7">Letzte 7 Tage</button>
-            <button class="small" data-range="14">Letzte 14 Tage</button>
-            <button class="small" data-range="30">30 Tage</button>
-            <button class="small" data-range="all">Gesamt</button>
-          </div>
-        </div>
-        <div class="toggle-details" id="toggleStats">Ausklappen ▾</div>
-      </div>
-
-      <div id="statsContent" style="display:none;margin-top:10px">
-        <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap">
-          <div style="flex:1;min-width:320px">
-            <table id="statsTable" aria-label="Statistiken Tabelle">
-              <thead><tr><th>Kategorie</th><th>Gesamt</th><th>Ø / Tag</th><th>/ Woche</th><th>Sessions</th></tr></thead>
-              <tbody></tbody>
-            </table>
-          </div>
-
-          <div style="width:420px">
-            <canvas id="barChart" width="420" height="220" role="img" aria-label="Balkendiagramm"></canvas>
-          </div>
-        </div>
-
-        <div style="margin-top:12px">
-          <div style="font-weight:700;margin-bottom:8px">Verlauf</div>
-          <canvas id="lineChart" width="980" height="240" style="width:100%" role="img" aria-label="Liniendiagramm"></canvas>
-        </div>
-
-        <div style="margin-top:12px">
-          <div style="font-weight:700;margin-bottom:8px">Sessions (Details)</div>
-          <div class="sessions-list"><table id="sessionsTable"><thead>
-  <tr>
-    <th>Datum</th>
-    <th>Kategorie</th>
-    <th>Dauer</th>
-    <th>Notiz</th>
-  </tr>
-</thead><tbody></tbody></table></div>
-        </div>
-      </div>
-    </section>
-
-    <div id="modalRoot"></div>
+<div class="top">
+<section class="cats-panel" aria-labelledby="catsTitle">
+<div style="display:flex;justify-content:space-between;align-items:center">
+  <div style="display:flex;gap:8px;align-items:center">
+    <button id="addCategoryBtn" class="accent small" aria-label="Kategorie hinzufügen">Kategorie hinzufügen</button>
+    <button id="delModeBtn" class="ghost small" aria-pressed="false" title="In den Lösch-Modus wechseln">Löschen</button>
   </div>
+  <div style="text-align:right">
+    <div id="catsTitle" style="font-size:0.9rem;color:var(--muted)">Kategorien</div>
+  </div>
+</div>
+
+<div class="category-list" id="categoryList" aria-live="polite" style="margin-top:12px"></div>
+
+<div class="actions-row" style="margin-top:12px">
+  <input type="file" id="importFile" accept=".csv,text/csv" style="display:none" aria-hidden="true" />
+  <button id="exportBtn" class="small ghost" title="Export als CSV">Export (CSV)</button>
+  <button id="importBtn" class="small ghost" title="Import aus CSV">Import</button>
+  <button id="refreshBtn" class="small ghost" title="Daten neu laden">🔄 Refresh</button>
+  <button id="resetBtn" class="small danger" title="Reset Optionen">Reset</button>
+</div>
+
+<div class="centered" style="margin-top:10px">
+  <button id="forgotBtn" class="accent" style="white-space:nowrap">Zeit stoppen vergessen?</button>
+</div>
+</section>
+
+<aside class="timer-panel" aria-label="Timer Panel">
+<div style="font-size:0.9rem;color:var(--muted)">Aktueller Timer</div>
+<div class="time-big" id="activeTimerDisplay">--:--:--</div>
+<div style="width:100%;display:flex;gap:8px;align-items:center">
+  <label for="activeCategorySelect" style="min-width:110px;color:var(--muted)">Kategorie</label>
+  <select id="activeCategorySelect" aria-label="Aktive Kategorie" style="flex:1"></select>
+</div>
+<div class="timer-controls" style="width:100%;justify-content:center">
+  <button id="startBtn" class="small">Start</button>
+  <button id="stopBtn" class="small">Stop</button>
+</div>
+<div style="font-size:0.9rem;color:var(--muted);text-align:center;margin-top:6px">Timer läuft auch nach Reload weiter</div>
+</aside>
+</div>
+
+<section class="stats-panel" id="statsPanel" aria-labelledby="statsTitle">
+<div class="stats-header">
+<div style="display:flex;gap:10px;align-items:center">
+<div id="statsTitle" style="font-weight:700">Statistiken</div>
+<div id="rangeButtons" style="display:flex;gap:6px">
+  <button class="small" data-range="7">Letzte 7 Tage</button>
+  <button class="small" data-range="14">Letzte 14 Tage</button>
+  <button class="small" data-range="30">30 Tage</button>
+  <button class="small" data-range="all">Gesamt</button>
+</div>
+</div>
+<div class="toggle-details" id="toggleStats">Ausklappen ▾</div>
+</div>
+
+<div id="statsContent" style="display:none;margin-top:10px">
+<div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap">
+<div style="flex:1;min-width:320px">
+<table id="statsTable" aria-label="Statistiken Tabelle">
+<thead><tr><th>Kategorie</th><th>Gesamt</th><th>Ø / Tag</th><th>/ Woche</th><th>Sessions</th></tr></thead>
+<tbody></tbody>
+</table>
+</div>
+<div style="width:420px">
+<canvas id="barChart" width="420" height="220" role="img" aria-label="Balkendiagramm"></canvas>
+</div>
+</div>
+
+<div style="margin-top:12px">
+<div style="font-weight:700;margin-bottom:8px">Verlauf</div>
+<canvas id="lineChart" width="980" height="240" style="width:100%" role="img" aria-label="Liniendiagramm"></canvas>
+</div>
+
+<div style="margin-top:12px">
+<div style="font-weight:700;margin-bottom:8px">Sessions (Details)</div>
+<div class="sessions-list"><table id="sessionsTable"><thead>
+<tr><th>Kategorie</th><th>Start</th><th>Ende</th><th>Dauer</th><th>Notiz</th></tr>
+</thead><tbody></tbody></table></div>
+</div>
+</div>
+</section>
+
+<!-- Modals -->
+<div id="modalContainer"></div>
+
+<!-- Toast -->
+<div id="toast" class="toast" style="position:fixed;bottom:14px;left:50%;transform:translateX(-50%);padding:10px 16px;border-radius:10px;display:none;opacity:0;transition:opacity 0.4s ease;">Daten neu geladen ✅</div>
+
+<!-- Ladeanzeige -->
+<div id="loader" style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.05);font-size:1.2rem;animation:pulse 1.4s infinite;">⏳ Lade Daten …</div>
 
 <script>
-window.addEventListener('DOMContentLoaded', () => {
-// ---- Token-Prüfung inkl. Initialpasswort Weiterleitung ----
-const token = localStorage.getItem("token");
-if (!token) {
-  window.location.href = "login.html"; // Weiterleitung, falls kein Token vorhanden
-  return;
+// ===== THEME =====
+const modeToggle=document.getElementById('modeToggle');
+if(localStorage.theme==='dark') document.documentElement.classList.add('dark');
+updateThemeIcon();
+modeToggle.onclick=()=>{
+  document.documentElement.classList.toggle('dark');
+  localStorage.theme=document.documentElement.classList.contains('dark')?'dark':'light';
+  updateThemeIcon();
 }
-let _zm_user = null;
-try {
-  const userData = JSON.parse(atob(token));
-  _zm_user = userData; // global verfügbar
-  window._zm_user = _zm_user;
-  console.log("Eingeloggt als:", userData.username, "Rolle:", userData.role);
+function updateThemeIcon(){modeToggle.textContent=document.documentElement.classList.contains('dark')?'🌙':'☀️'}
 
-  // 🔹 Initialpasswort prüfen
-  if (_zm_user.isInitialPassword) {
-    window.location.href = "change-password.html"; // sofort weiterleiten
-    return;
-  }
+// ===== DATA =====
+let categories=[],sessions=[],activeTimer=null,activeCategory=null;
 
-} catch {
-  localStorage.removeItem("token");
-  window.location.href = "login.html";
-  return;
+// ===== STORAGE =====
+function saveData(){localStorage.setItem('categories',JSON.stringify(categories));localStorage.setItem('sessions',JSON.stringify(sessions))}
+function loadData(){
+  const cat=localStorage.getItem('categories');
+  const ses=localStorage.getItem('sessions');
+  if(cat) categories=JSON.parse(cat);
+  if(ses) sessions=JSON.parse(ses);
+  updateUI();
 }
-  // -----------------------
-
-  const loadingEl = document.getElementById('loading');
-  loadingEl.style.display = 'block';
-  setTimeout(() => loadingEl.style.opacity = 1, 20);
-
-  const LS_KEY = 'zm:data_v1';
-  const LS_ACTIVE = 'zm:active_v1';
-  const LS_THEME = 'zm:theme_v1';
-  let state = { categories: [], active: null, theme: 'light' };
-
-  // ------------------- Utility -------------------
-  const uid = ()=> Math.random().toString(36).slice(2,9);
-  const msToHms = ms => {
-    if(!isFinite(ms)) return '--:--:--';
-    const secs = Math.floor(ms/1000);
-    const h = Math.floor(secs/3600), m = Math.floor((secs%3600)/60), s = secs%60;
-    return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-  };
-  const minutesToHuman = min => { const h = Math.floor(min/60); const m = Math.round(min%60); return `${h}h ${m}m`; };
-  const escapeHtml = t => String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  const escapeCsv = t => { if(t==null) return ''; const s=String(t); if(s.includes(',')||s.includes('"')||s.includes('\n')) return '"' + s.replace(/"/g,'""') + '"'; return s; };
-  const csvSplit = line => { const out=[]; let cur='', inQ=false; for(let i=0;i<line.length;i++){ const ch=line[i]; if(inQ){ if(ch==='\"' && line[i+1]==='\"'){ cur+='"'; i++; } else if(ch==='\"'){ inQ=false; } else cur+=ch; } else { if(ch===','){ out.push(cur); cur=''; } else if(ch==='\"'){ inQ=true; } else cur+=ch; } } out.push(cur); return out; };
-
-  function ensure(){ state.categories=state.categories||[]; state.active=state.active||null; state.theme=state.theme||'light'; state.categories.forEach(c=>c.sessions=c.sessions||[]); }
-
-  // ------------------- DOM -------------------
-  const categoryList = document.getElementById('categoryList');
-  const addCategoryBtn = document.getElementById('addCategoryBtn');
-  const delModeBtn = document.getElementById('delModeBtn');
-  const activeCategorySelect = document.getElementById('activeCategorySelect');
-  const startBtn = document.getElementById('startBtn');
-  const stopBtn = document.getElementById('stopBtn');
-  const activeTimerDisplay = document.getElementById('activeTimerDisplay');
-  const forgotBtn = document.getElementById('forgotBtn');
-  const modalRoot = document.getElementById('modalRoot');
-  const resetBtn = document.getElementById('resetBtn');
-  const exportBtn = document.getElementById('exportBtn');
-  const importBtn = document.getElementById('importBtn');
-  const refreshBtn = document.getElementById('refreshBtn');
-  const importFile = document.getElementById('importFile');
-  const toggleStats = document.getElementById('toggleStats');
-  const statsContent = document.getElementById('statsContent');
-  const statsTableBody = document.querySelector('#statsTable tbody');
-  const sessionsTableBody = document.querySelector('#sessionsTable tbody');
-  const barCanvas = document.getElementById('barChart');
-  const lineCanvas = document.getElementById('lineChart');
-  const timespanButtons = document.getElementById('rangeButtons');
-  const modeToggle = document.getElementById('modeToggle');
-
-  // ------------------- Load/Save -------------------
-  async function load() {
-    loading.style.display = "block";
-    try {
-      const res = await fetch("/functions/loadData");
-      if (res.ok) {
-        const remoteData = await res.json();
-        if (remoteData && typeof remoteData === "object") {
-          state.categories = remoteData.categories || [];
-          state.active = remoteData.active || null;
-          state.theme = remoteData.theme || "light";
-          console.log("Cloud-Daten geladen ✅ (inkl. Theme)");
-        }
-      }
-    } catch (e) { console.warn("⚠️ Konnte Cloud-Daten nicht laden:", e); }
-
-    const raw = localStorage.getItem(LS_KEY);
-    if (raw) {
-      try { const parsed = JSON.parse(raw); if(parsed && typeof parsed==='object') state = parsed; } 
-      catch(e){ console.error("Lokale Daten fehlerhaft:",e); localStorage.removeItem(LS_KEY); }
-    }
-
-    const activeRaw = localStorage.getItem(LS_ACTIVE);
-    if(activeRaw){ try{ state.active = JSON.parse(activeRaw); } catch{ state.active=null; } }
-
-    const themeRaw = localStorage.getItem(LS_THEME);
-    if(themeRaw) state.theme = themeRaw;
-
-    ensure();
-
-    setTimeout(() => { loading.style.opacity = 0; setTimeout(() => loading.style.display="none",400); }, 500);
-  }
-
-  async function save() {
-    try {
-      localStorage.setItem(LS_KEY, JSON.stringify(state));
-      if(state.active) localStorage.setItem(LS_ACTIVE, JSON.stringify(state.active));
-      localStorage.setItem(LS_THEME, state.theme || "light");
-
-      await fetch("/functions/saveData", {
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body: JSON.stringify({ categories: state.categories || [], active: state.active || null, theme: state.theme || "light" })
-      });
-    } catch(e){ console.warn("Cloud-Sync fehlgeschlagen:",e); }
-  }
-
-  // ------------------- Theme -------------------
-  let currentRange='7'; let delMode=false;
-  function applyTheme(){
-    if(state.theme==='light'){ document.documentElement.classList.remove('dark'); } 
-    else{ document.documentElement.classList.add('dark'); }
-    modeToggle.textContent = state.theme==='light' ? '☀️' : '🌙';
-    drawBarChart(); drawLineChart();
-  }
-  modeToggle.addEventListener('click', ()=>{
-    state.theme = state.theme==='light'?'dark':'light'; applyTheme(); save();
-  });
-modeToggle.addEventListener('click', ()=>{
-  state.theme = state.theme === 'light' ? 'dark' : 'light'; 
-  applyTheme(); 
-  save();
-});
-
-// 🔹 Logout-Funktion
-function logout() {
-  if (confirm('Willst du dich wirklich ausloggen?')) {
-    localStorage.removeItem('token');   // Token löschen
-    localStorage.removeItem(LS_ACTIVE); // aktive Session entfernen
-    window.location.href = 'login.html';
-  }
+function showToast(msg='Daten neu geladen ✅'){
+  const t=document.getElementById('toast'); t.textContent=msg; t.style.display='block';
+  setTimeout(()=>{t.style.opacity='1';},50);
+  setTimeout(()=>{t.style.opacity='0';setTimeout(()=>{t.style.display='none'},400)},1600);
 }
 
-// Logout-Button einbinden
-const logoutBtn = document.getElementById('logoutBtn');
-if (logoutBtn) logoutBtn.addEventListener('click', logout);
+// ===== LOADER =====
+function hideLoader(){document.getElementById('loader').classList.add('fade-out');setTimeout(()=>document.getElementById('loader').remove(),500)}
 
-  // ------------------- Kategorien -------------------
-  function renderCategories(){
-    categoryList.innerHTML=''; activeCategorySelect.innerHTML='';
-    for(const c of state.categories){
-      const card = document.createElement('div'); card.className='category-card'; card.dataset.id=c.id;
-      const left = document.createElement('div'); left.style.display='flex'; left.style.flexDirection='column';
-      const name = document.createElement('div'); name.className='category-name'; name.textContent=c.name;
-      const meta = document.createElement('div'); meta.className='category-meta';
-      const totalMin = (c.sessions||[]).reduce((s,x)=> s + (x.durationMin || (x.end? Math.round((x.end-x.start)/60000):0)), 0);
-      meta.textContent = `${totalMin} min • ${ (c.sessions||[]).length } sessions`;
-      left.appendChild(name); left.appendChild(meta);
-
-      const actions = document.createElement('div'); actions.style.display='flex'; actions.style.alignItems='center'; actions.style.gap='8px';
-      const startBtnLocal = document.createElement('button'); startBtnLocal.className='small'; startBtnLocal.textContent='Start';
-      startBtnLocal.onclick=()=>{ activeCategorySelect.value=c.id; startTimer(); };
-      const detailsBtn = document.createElement('button'); detailsBtn.className='small ghost'; detailsBtn.textContent='Details';
-      detailsBtn.onclick=()=> showCategoryDetails(c.id);
-      actions.appendChild(startBtnLocal); actions.appendChild(detailsBtn);
-
-      if(delMode){ const del=document.createElement('button'); del.className='small danger'; del.textContent='Löschen'; del.onclick=()=>deleteCategory(c.id); actions.appendChild(del); }
-
-      card.appendChild(left); card.appendChild(actions); categoryList.appendChild(card);
-
-      const option=document.createElement('option'); option.value=c.id; option.textContent=c.name; activeCategorySelect.appendChild(option);
-    }
-    if(state.categories.length===0){
-      const info=document.createElement('div'); info.style.color='var(--muted)'; info.style.marginTop='8px'; info.textContent='Noch keine Kategorien. Lege eine an.'; categoryList.appendChild(info);
-    }
-  }
-
-  addCategoryBtn.addEventListener('click', ()=>{
-    const name=prompt('Name der Kategorie (z.B. Arbeit, Lernen):'); if(!name) return;
-    if(state.categories.some(c=>c.name.toLowerCase()===name.toLowerCase())){ alert('Diese Kategorie existiert bereits.'); return; }
-    const id=uid(); state.categories.push({id,name,sessions:[]}); save(); renderAll();
+// ===== CATEGORY =====
+function updateUI(){
+  const list=document.getElementById('categoryList');
+  list.innerHTML='';
+  const sel=document.getElementById('activeCategorySelect'); sel.innerHTML='';
+  categories.forEach((c,i)=>{
+    const div=document.createElement('div'); div.className='category-card';
+    div.innerHTML=`<div class="category-name">${c.name}</div><div class="category-meta">${c.total||0}h</div>`;
+    div.onclick=()=>{if(delModeBtn.getAttribute('aria-pressed')==='true'){categories.splice(i,1);saveData();updateUI();} else {activeCategory=c;}}
+    list.appendChild(div);
+    const opt=document.createElement('option'); opt.value=i; opt.textContent=c.name; sel.appendChild(opt);
   });
+}
 
-  delModeBtn.addEventListener('click', ()=>{
-    delMode=!delMode; delModeBtn.textContent=delMode?'Fertig':'Löschen'; delModeBtn.setAttribute('aria-pressed', String(delMode)); renderCategories();
-  });
-
-  function deleteCategory(id){ if(!confirm('Kategorie und alle zugehörigen Sessions wirklich löschen?')) return;
-    state.categories=state.categories.filter(c=>c.id!==id); if(state.active && state.active.categoryId===id) state.active=null; save(); renderAll();
+// ===== TIMER =====
+const activeTimerDisplay=document.getElementById('activeTimerDisplay');
+function startTimer(){
+  if(activeTimer) return;
+  const catIndex=document.getElementById('activeCategorySelect').value;
+  activeCategory=categories[catIndex]; if(!activeCategory){alert('Keine Kategorie ausgewählt');return;}
+  activeTimer={start:Date.now(),category:activeCategory.name};
+}
+function stopTimer(){
+  if(!activeTimer) return;
+  const end=Date.now(),start=activeTimer.start;
+  const dur=(end-start)/1000;
+  sessions.push({category:activeTimer.category,start,startTime:new Date(start).toISOString(),endTime:new Date(end).toISOString(),duration:dur,note:''});
+  activeTimer=null;
+  saveData(); updateUI(); showToast('Session gespeichert ✅');
+}
+setInterval(()=>{
+  if(activeTimer){
+    const diff=Date.now()-activeTimer.start;
+    const d=new Date(diff); activeTimerDisplay.textContent=`${String(Math.floor(diff/3600000)).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')}`;
   }
+},500);
 
-  // ------------------- Timer -------------------
-  startBtn.addEventListener('click', startTimer);
-  stopBtn.addEventListener('click', stopTimer);
+// ===== CSV =====
+document.getElementById('exportBtn').onclick=()=>{
+  let csv='Kategorie,Start,Ende,Dauer,Notiz\n';
+  sessions.forEach(s=>{csv+=`${s.category},${s.startTime},${s.endTime},${(s.duration/3600).toFixed(2)},${s.note}\n`});
+  const blob=new Blob([csv],{type:'text/csv'}); const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download='sessions.csv'; a.click(); URL.revokeObjectURL(url);
+}
+document.getElementById('importBtn').onclick=()=>document.getElementById('importFile').click();
+document.getElementById('importFile').onchange=function(e){
+  const file=e.target.files[0]; if(!file) return;
+  const reader=new FileReader(); reader.onload=function(ev){
+    const lines=ev.target.result.split('\n').slice(1);
+    lines.forEach(l=>{
+      const [cat,start,end,dur,note]=l.split(',');
+      if(cat) sessions.push({category:cat,start:Date.parse(start),startTime:start,endTime:end,duration:parseFloat(dur)*3600,note:note||''});
+    }); saveData(); updateUI(); showToast('CSV importiert ✅');
+  }; reader.readAsText(file);
+}
 
-  function startTimer(){
-    const catId=activeCategorySelect.value || (state.categories[0] && state.categories[0].id);
-    if(!catId){ alert('Bitte zuerst eine Kategorie anlegen und auswählen.'); return; }
-    if(state.active){ alert('Es läuft bereits ein Timer. Stoppe ihn zuerst.'); return; }
-    const start=Date.now(); state.active={categoryId:catId,start};
-    const cat=state.categories.find(c=>c.id===catId); cat.sessions=cat.sessions||[]; cat.sessions.push({id:uid(),start,end:null,durationMin:null});
-    save(); renderAll();
-  }
+// ===== MODALS =====
+const modalContainer=document.getElementById('modalContainer');
+function showModal(title,content){
+  const div=document.createElement('div'); div.className='modal-backdrop';
+  div.innerHTML=`<div class="modal"><h3>${title}</h3>${content}<div style="text-align:right;margin-top:12px"><button id="closeModalBtn">Schließen</button></div></div>`;
+  modalContainer.appendChild(div);
+  div.querySelector('#closeModalBtn').onclick=()=>div.remove();
+}
 
-  function stopTimer(){ 
-    if(!state.active){ alert('Kein laufender Timer.'); return; } 
-    const a=state.active; const end=Date.now();
-    const cat=state.categories.find(c=>c.id===a.categoryId); if(!cat) return;
-    const session=cat.sessions.slice().reverse().find(s=>!s.end && (s.start===a.start || s.start<=a.start));
-    if(session){
-      session.end=end; session.durationMin=Math.max(1,Math.round((session.end-session.start)/60000));
-      const modal=openModal(`<h3>Session-Notiz hinzufügen</h3><div style="margin-top:8px"><textarea id="noteText" rows="3" style="width:100%;border-radius:8px;padding:6px;border:1px solid var(--muted);" placeholder="Kurze Beschreibung dieser Session..."></textarea></div><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px"><button id="saveNote" class="accent small">Speichern</button><button id="skipNote" class="small">Überspringen</button></div>`);
-      const textArea=modal.querySelector('#noteText'); setTimeout(()=>textArea.focus(),50);
-      modal.querySelector('#saveNote').onclick=()=>{ session.note=textArea.value.trim(); closeModal(); finishStop(); };
-      modal.querySelector('#skipNote').onclick=()=>{ closeModal(); finishStop(); };
-    } else finishStop();
+// ===== STATS =====
+document.getElementById('toggleStats').onclick=()=>{
+  const c=document.getElementById('statsContent'); c.style.display=c.style.display==='none'?'block':'none';
+}
+function updateStats(){/* Hier können Chart.js Logik oder Canvas Zeichnungen kommen */}
 
-    function finishStop(){ state.active=null; localStorage.removeItem(LS_ACTIVE); save(); renderAll(); }
-  }
+// ===== BUTTONS =====
+document.getElementById('refreshBtn').onclick=()=>{loadData(); showToast();}
+document.getElementById('resetBtn').onclick=()=>{if(confirm('Alles löschen?')){categories=[];sessions=[];saveData();updateUI();showToast('Reset ✅');}}
+document.getElementById('addCategoryBtn').onclick=()=>{
+  const name=prompt('Name der Kategorie'); if(name){categories.push({name,total:0});saveData();updateUI();}}
+const delModeBtn=document.getElementById('delModeBtn');
+delModeBtn.onclick=()=>{const pressed=delModeBtn.getAttribute('aria-pressed')==='true';delModeBtn.setAttribute('aria-pressed',!pressed);}
 
-  setInterval(()=>{
-    if(state.active){ const secs=Math.floor((Date.now()-state.active.start)/1000); activeTimerDisplay.textContent=msToHms(secs*1000); }
-    else activeTimerDisplay.textContent='--:--:--';
-  },500);
+// ===== LOGOUT =====
+document.getElementById('logoutBtn').onclick=()=>{alert('Logout erfolgt');}
 
-  // ------------------- Modals -------------------
-  function openModal(innerHTML){
-    closeModal();
-    const backdrop = document.createElement('div'); backdrop.className='modal-backdrop';
-    const modal = document.createElement('div'); modal.className='modal';
-    modal.innerHTML = innerHTML + `<div style="text-align:right;margin-top:8px"><button id="closeModal" class="small">Schließen</button></div>`;
-    backdrop.appendChild(modal); modalRoot.appendChild(backdrop);
-    backdrop.querySelector('#closeModal').onclick = ()=> closeModal();
-    return modal;
-  }
-  function closeModal(){ modalRoot.innerHTML=''; }
+// ===== FORGOT TIMER =====
+document.getElementById('forgotBtn').onclick=()=>{showModal('Vergessene Zeit hinzufügen','<div class="form-row"><label>Dauer (Minuten)</label><input type="number" id="forgotMinutes" min="1" /></div><button id="addForgot" class="accent">Hinzufügen</button>'); document.getElementById('addForgot').onclick=()=>{
+  const mins=parseFloat(document.getElementById('forgotMinutes').value); if(!activeCategory || !mins) return;
+  const now=Date.now();
+  sessions.push({category:activeCategory.name,start:now-mins*60000,startTime:new Date(now-mins*60000).toISOString(),endTime:new Date(now).toISOString(),duration:mins*60,note:'Manuell nachgetragen'});
+  saveData(); updateUI(); modalContainer.innerHTML=''; showToast('Manuell hinzugefügt ✅');
+}}
 
-  // ------------------- Render All -------------------
-  function renderAll(){ renderCategories(); renderStats(); }
-
-  // ------------------- Initial Load -------------------
-  (async ()=>{
-    console.log("⏳ Lade Daten...");
-    await load();
-    renderAll();
-    applyTheme();
-    console.log("✅ Daten vollständig geladen und angezeigt");
-  })();
-
-  window._zm_state=state;
-
-});
+// ===== INIT =====
+loadData();
+hideLoader();
 </script>
-
-
+</div>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
