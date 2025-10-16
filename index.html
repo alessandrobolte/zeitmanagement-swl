@@ -247,77 +247,97 @@
 
 <script>
 window.addEventListener('DOMContentLoaded', () => {
-const loadingEl = document.getElementById('loading');
-
-// Zeigt die Ladeanzeige, sobald die Seite initialisiert wird
-loadingEl.style.display = 'block';
-setTimeout(() => loadingEl.style.opacity = 1, 20);
-
-// Danach (nach dem Laden der Daten) ausblenden
-async function load() {
-  loadingEl.style.opacity = 1;
-
+  // ---- Token-Prüfung ----
+  const token = localStorage.getItem("token");
+  if (!token) {
+    window.location.href = "login.html"; // Weiterleitung, falls kein Token vorhanden
+    return; // Rest des Scripts nicht ausführen
+  }
+  let _zm_user = null;
   try {
-    const res = await fetch("/functions/loadData");
-    if (res.ok) {
-      const remoteData = await res.json();
-      if (remoteData && typeof remoteData === "object") {
-        state.categories = remoteData.categories || [];
-        state.active = remoteData.active || null;
-        state.theme = remoteData.theme || "light"; // 🟢 sauber integriert
-        console.log("Cloud-Daten geladen ✅ (inkl. Theme)");
+    const userData = JSON.parse(atob(token));
+    console.log("Eingeloggt als:", userData.username, "Rolle:", userData.role);
+    _zm_user = userData; // global verfügbar
+    window._zm_user = _zm_user;
+  } catch {
+    localStorage.removeItem("token");
+    window.location.href = "login.html";
+    return;
+  }
+  // -----------------------
+
+  const loadingEl = document.getElementById('loading');
+
+  // Zeigt die Ladeanzeige, sobald die Seite initialisiert wird
+  loadingEl.style.display = 'block';
+  setTimeout(() => loadingEl.style.opacity = 1, 20);
+
+  // Danach (nach dem Laden der Daten) ausblenden
+  async function load() {
+    loadingEl.style.opacity = 1;
+
+    try {
+      const res = await fetch("/functions/loadData");
+      if (res.ok) {
+        const remoteData = await res.json();
+        if (remoteData && typeof remoteData === "object") {
+          state.categories = remoteData.categories || [];
+          state.active = remoteData.active || null;
+          state.theme = remoteData.theme || "light"; // 🟢 sauber integriert
+          console.log("Cloud-Daten geladen ✅ (inkl. Theme)");
+        }
+      } else {
+        console.warn("⚠️ loadData antwortet mit:", res.status);
       }
-    } else {
-      console.warn("⚠️ loadData antwortet mit:", res.status);
-    }
-  } catch (e) {
-    console.warn("⚠️ Konnte Cloud-Daten nicht laden:", e);
-  }
-
-  // 🔹 Lokale Fallback-Daten laden, falls Cloud fehlte
-  const raw = localStorage.getItem(LS_KEY);
-  if (raw) {
-    try {
-      const parsed = JSON.parse(raw);
-      if (parsed && typeof parsed === "object") state = parsed;
     } catch (e) {
-      console.error("⚠️ Lokale Daten fehlerhaft:", e);
-      localStorage.removeItem(LS_KEY);
+      console.warn("⚠️ Konnte Cloud-Daten nicht laden:", e);
     }
-  }
 
-  // 🔹 Aktive Session aus localStorage wiederherstellen
-  const activeRaw = localStorage.getItem(LS_ACTIVE);
-  if (activeRaw) {
-    try {
-      state.active = JSON.parse(activeRaw);
-    } catch {
-      state.active = null;
+    // 🔹 Lokale Fallback-Daten laden, falls Cloud fehlte
+    const raw = localStorage.getItem(LS_KEY);
+    if (raw) {
+      try {
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === "object") state = parsed;
+      } catch (e) {
+        console.error("⚠️ Lokale Daten fehlerhaft:", e);
+        localStorage.removeItem(LS_KEY);
+      }
     }
+
+    // 🔹 Aktive Session aus localStorage wiederherstellen
+    const activeRaw = localStorage.getItem(LS_ACTIVE);
+    if (activeRaw) {
+      try {
+        state.active = JSON.parse(activeRaw);
+      } catch {
+        state.active = null;
+      }
+    }
+
+    // 🔹 Theme aus localStorage (höchste Priorität)
+    const themeRaw = localStorage.getItem(LS_THEME);
+    if (themeRaw) {
+      state.theme = themeRaw;
+    }
+
+    ensure();
+
+    // 🔹 Ladeanzeige sanft ausblenden
+    setTimeout(() => {
+      loadingEl.style.opacity = 0;
+      setTimeout(() => (loadingEl.style.display = "none"), 400);
+    }, 500);
   }
 
-  // 🔹 Theme aus localStorage (höchste Priorität)
-  const themeRaw = localStorage.getItem(LS_THEME);
-  if (themeRaw) {
-    state.theme = themeRaw;
-  }
-
-  ensure();
-
-  // 🔹 Ladeanzeige sanft ausblenden
-  setTimeout(() => {
-    loadingEl.style.opacity = 0;
-    setTimeout(() => (loadingEl.style.display = "none"), 400);
-  }, 500);
-}
   const LS_KEY = 'zm:data_v1';
   const LS_ACTIVE = 'zm:active_v1';
   const LS_THEME = 'zm:theme_v1';
 
   let state = { categories: [], active: null, theme: 'light' };
-    // 🟢 Theme beim Start sofort anwenden (verhindert Flackern)
   
-
+  // 🟢 Theme beim Start sofort anwenden (verhindert Flackern)
+  
   const uid = ()=> Math.random().toString(36).slice(2,9);
   const msToHms = ms => {
     if(!isFinite(ms)) return '--:--:--';
@@ -342,24 +362,6 @@ async function load() {
   const importBtn = document.getElementById('importBtn');
   const refreshBtn = document.getElementById('refreshBtn');
   const loading = document.getElementById('loading');
-refreshBtn.addEventListener('click', async () => {
-  loading.style.display = "block";
-  loading.classList.remove("fade-out");
-
-  await load();       // Cloud-Daten erneut laden
-  renderAll();        // Anzeige aktualisieren
-
-  loading.classList.add("fade-out");
-  setTimeout(() => (loading.style.visibility = "hidden"), 400);
-
-  // 🎉 Erfolgsmeldung kurz einblenden
-const toast = document.getElementById('toast');
-toast.textContent = 'Daten neu geladen ✅';
-toast.classList.add('show');
-setTimeout(() => {
-  toast.classList.remove('show');
-}, 2500);
-});
   const importFile = document.getElementById('importFile');
   const toggleStats = document.getElementById('toggleStats');
   const statsContent = document.getElementById('statsContent');
@@ -879,6 +881,7 @@ if(start) cat.sessions.push({id:uid(), start, end, durationMin: dur, note});
 </script>
 </body>
 </html>
+
 
 
 
