@@ -247,23 +247,30 @@
 
 <script>
 window.addEventListener('DOMContentLoaded', () => {
-  // ---- Token-Prüfung / Redirect ----
-  const token = localStorage.getItem("token");
-  if (!token) {
-    window.location.href = "login.html"; // Weiterleitung, falls kein Token vorhanden
-    return; // Rest des Scripts nicht ausführen
-  }
-  let _zm_user = null;
-  try {
-    const userData = JSON.parse(atob(token));
-    console.log("Eingeloggt als:", userData.username, "Rolle:", userData.role);
-    _zm_user = userData; // global verfügbar
-    window._zm_user = _zm_user;
-  } catch {
-    localStorage.removeItem("token");
-    window.location.href = "login.html";
+// ---- Token-Prüfung inkl. Initialpasswort Weiterleitung ----
+const token = localStorage.getItem("token");
+if (!token) {
+  window.location.href = "login.html"; // Weiterleitung, falls kein Token vorhanden
+  return;
+}
+let _zm_user = null;
+try {
+  const userData = JSON.parse(atob(token));
+  _zm_user = userData; // global verfügbar
+  window._zm_user = _zm_user;
+  console.log("Eingeloggt als:", userData.username, "Rolle:", userData.role);
+
+  // 🔹 Initialpasswort prüfen
+  if (_zm_user.isInitialPassword) {
+    window.location.href = "change-password.html"; // sofort weiterleiten
     return;
   }
+
+} catch {
+  localStorage.removeItem("token");
+  window.location.href = "login.html";
+  return;
+}
   // -----------------------
 
   const loadingEl = document.getElementById('loading');
@@ -483,6 +490,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
 </body>
 </html>
+
 
 
 
