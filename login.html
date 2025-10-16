@@ -67,10 +67,13 @@ document.addEventListener('DOMContentLoaded',()=>{
     const pass = document.getElementById('password').value.trim();
     if(!user || !pass){ showToast('Bitte Benutzername und Passwort eingeben'); return; }
 
-    // Hier würde der Server-/Cloud-Aufruf erfolgen
-    console.log('Login:', user, pass);
+    // 🔹 Token speichern (hier als Base64 JSON, z.B. username + Rolle)
+    const tokenData = { username: user, role: 'user' }; // Rolle kann angepasst werden
+    localStorage.setItem('token', btoa(JSON.stringify(tokenData)));
 
     showToast('Login erfolgreich ✅');
+
+    // 🔹 Nach 1,5 s weiterleiten zu index.html
     setTimeout(()=>window.location.href='/index.html',1500);
   });
 });
