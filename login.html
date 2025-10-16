@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Login - Zeitmanagement</title>
+</head>
+<body>
+  <h1>Login</h1>
+  <form id="loginForm">
+    <input type="text" id="username" placeholder="Benutzername" required><br>
+    <input type="password" id="password" placeholder="Passwort" required><br>
+    <button type="submit">Login</button>
+  </form>
+  <p id="message" style="color:red;"></p>
+
+  <script>
+    const form = document.getElementById("loginForm");
+    const message = document.getElementById("message");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const username = document.getElementById("username").value;
+      const password = document.getElementById("password").value;
+
+      try {
+        const res = await fetch("/.netlify/functions/userManagement/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, password })
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          message.textContent = data || "Login fehlgeschlagen";
+          return;
+        }
+
+        // Token speichern
+        localStorage.setItem("token", data.token);
+
+        // Weiterleitung
+        if (data.mustChangePassword) {
+          window.location.href = "change-password.html";
+        } else {
+          window.location.href = "index.html";
+        }
+
+      } catch (err) {
+        message.textContent = "Fehler beim Login";
+        console.error(err);
+      }
+    });
+  </script>
+</body>
+</html>
