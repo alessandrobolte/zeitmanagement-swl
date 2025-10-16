@@ -267,8 +267,6 @@ window.addEventListener('DOMContentLoaded', () => {
   // -----------------------
 
   const loadingEl = document.getElementById('loading');
-
-  // Zeigt die Ladeanzeige, sobald die Seite initialisiert wird
   loadingEl.style.display = 'block';
   setTimeout(() => loadingEl.style.opacity = 1, 20);
 
@@ -277,7 +275,7 @@ window.addEventListener('DOMContentLoaded', () => {
   const LS_THEME = 'zm:theme_v1';
   let state = { categories: [], active: null, theme: 'light' };
 
-  // Utility-Funktionen
+  // ------------------- Utility -------------------
   const uid = ()=> Math.random().toString(36).slice(2,9);
   const msToHms = ms => {
     if(!isFinite(ms)) return '--:--:--';
@@ -287,8 +285,12 @@ window.addEventListener('DOMContentLoaded', () => {
   };
   const minutesToHuman = min => { const h = Math.floor(min/60); const m = Math.round(min%60); return `${h}h ${m}m`; };
   const escapeHtml = t => String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const escapeCsv = t => { if(t==null) return ''; const s=String(t); if(s.includes(',')||s.includes('"')||s.includes('\n')) return '"' + s.replace(/"/g,'""') + '"'; return s; };
+  const csvSplit = line => { const out=[]; let cur='', inQ=false; for(let i=0;i<line.length;i++){ const ch=line[i]; if(inQ){ if(ch==='\"' && line[i+1]==='\"'){ cur+='"'; i++; } else if(ch==='\"'){ inQ=false; } else cur+=ch; } else { if(ch===','){ out.push(cur); cur=''; } else if(ch==='\"'){ inQ=true; } else cur+=ch; } } out.push(cur); return out; };
 
-  // DOM-Elemente
+  function ensure(){ state.categories=state.categories||[]; state.active=state.active||null; state.theme=state.theme||'light'; state.categories.forEach(c=>c.sessions=c.sessions||[]); }
+
+  // ------------------- DOM -------------------
   const categoryList = document.getElementById('categoryList');
   const addCategoryBtn = document.getElementById('addCategoryBtn');
   const delModeBtn = document.getElementById('delModeBtn');
@@ -302,7 +304,6 @@ window.addEventListener('DOMContentLoaded', () => {
   const exportBtn = document.getElementById('exportBtn');
   const importBtn = document.getElementById('importBtn');
   const refreshBtn = document.getElementById('refreshBtn');
-  const loading = document.getElementById('loading');
   const importFile = document.getElementById('importFile');
   const toggleStats = document.getElementById('toggleStats');
   const statsContent = document.getElementById('statsContent');
@@ -352,7 +353,7 @@ window.addEventListener('DOMContentLoaded', () => {
       if(state.active) localStorage.setItem(LS_ACTIVE, JSON.stringify(state.active));
       localStorage.setItem(LS_THEME, state.theme || "light");
 
-      const res = await fetch("/functions/saveData", {
+      await fetch("/functions/saveData", {
         method:"POST",
         headers:{"Content-Type":"application/json"},
         body: JSON.stringify({ categories: state.categories || [], active: state.active || null, theme: state.theme || "light" })
@@ -360,19 +361,14 @@ window.addEventListener('DOMContentLoaded', () => {
     } catch(e){ console.warn("Cloud-Sync fehlgeschlagen:",e); }
   }
 
-  function ensure(){ state.categories=state.categories||[]; state.active=state.active||null; state.theme=state.theme||'light'; state.categories.forEach(c=>c.sessions=c.sessions||[]); }
-
-  // ------------------- Initialisierung -------------------
+  // ------------------- Theme -------------------
   let currentRange='7'; let delMode=false;
-  applyTheme(); renderAll();
-
   function applyTheme(){
     if(state.theme==='light'){ document.documentElement.classList.remove('dark'); } 
     else{ document.documentElement.classList.add('dark'); }
     modeToggle.textContent = state.theme==='light' ? '☀️' : '🌙';
     drawBarChart(); drawLineChart();
   }
-
   modeToggle.addEventListener('click', ()=>{
     state.theme = state.theme==='light'?'dark':'light'; applyTheme(); save();
   });
@@ -450,30 +446,44 @@ window.addEventListener('DOMContentLoaded', () => {
     function finishStop(){ state.active=null; localStorage.removeItem(LS_ACTIVE); save(); renderAll(); }
   }
 
-  // ------------------- Active Timer Update -------------------
   setInterval(()=>{
     if(state.active){ const secs=Math.floor((Date.now()-state.active.start)/1000); activeTimerDisplay.textContent=msToHms(secs*1000); }
     else activeTimerDisplay.textContent='--:--:--';
   },500);
 
-  // ------------------- Manual Entry / Reset / Export / Import / Stats / Charts -------------------
-  // ... (Rest des Scripts unverändert, wie in deinem Block) ...
+  // ------------------- Modals -------------------
+  function openModal(innerHTML){
+    closeModal();
+    const backdrop = document.createElement('div'); backdrop.className='modal-backdrop';
+    const modal = document.createElement('div'); modal.className='modal';
+    modal.innerHTML = innerHTML + `<div style="text-align:right;margin-top:8px"><button id="closeModal" class="small">Schließen</button></div>`;
+    backdrop.appendChild(modal); modalRoot.appendChild(backdrop);
+    backdrop.querySelector('#closeModal').onclick = ()=> closeModal();
+    return modal;
+  }
+  function closeModal(){ modalRoot.innerHTML=''; }
+
+  // ------------------- Render All -------------------
+  function renderAll(){ renderCategories(); renderStats(); }
 
   // ------------------- Initial Load -------------------
   (async ()=>{
     console.log("⏳ Lade Daten...");
     await load();
     renderAll();
+    applyTheme();
     console.log("✅ Daten vollständig geladen und angezeigt");
   })();
 
   window._zm_state=state;
 
-}); // DOMContentLoaded end
+});
 </script>
+
 
 </body>
 </html>
+
 
 
 
