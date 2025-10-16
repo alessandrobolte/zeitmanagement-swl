@@ -150,6 +150,7 @@
       <h1>Zeitmanagement</h1>
       <div class="top-controls">
         <button id="modeToggle" class="small" title="Toggle Theme">☀️</button>
+		<button id="logoutBtn" class="small ghost">Logout</button>
       </div>
     </header>
 
@@ -379,6 +380,24 @@ try {
   modeToggle.addEventListener('click', ()=>{
     state.theme = state.theme==='light'?'dark':'light'; applyTheme(); save();
   });
+modeToggle.addEventListener('click', ()=>{
+  state.theme = state.theme === 'light' ? 'dark' : 'light'; 
+  applyTheme(); 
+  save();
+});
+
+// 🔹 Logout-Funktion
+function logout() {
+  if (confirm('Willst du dich wirklich ausloggen?')) {
+    localStorage.removeItem('token');   // Token löschen
+    localStorage.removeItem(LS_ACTIVE); // aktive Session entfernen
+    window.location.href = 'login.html';
+  }
+}
+
+// Logout-Button einbinden
+const logoutBtn = document.getElementById('logoutBtn');
+if (logoutBtn) logoutBtn.addEventListener('click', logout);
 
   // ------------------- Kategorien -------------------
   function renderCategories(){
@@ -490,6 +509,7 @@ try {
 
 </body>
 </html>
+
 
 
 
