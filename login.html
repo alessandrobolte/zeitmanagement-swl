@@ -3,17 +3,130 @@
 <head>
   <meta charset="UTF-8">
   <title>Login - Zeitmanagement</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* Container zentrieren */
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    .login-container {
+      padding: 40px;
+      border-radius: 12px;
+      width: 320px;
+      text-align: center;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    h1 {
+      margin-bottom: 30px;
+      font-size: 2rem;
+    }
+
+    .input-field {
+      width: 100%;
+      padding: 10px 15px;
+      margin: 10px 0;
+      border-radius: 6px;
+      border: 1px solid;
+      font-size: 1rem;
+      transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+    }
+
+    .input-field::placeholder {
+      color: #9ca3af;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      margin-top: 15px;
+      border: none;
+      border-radius: 6px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .error-message {
+      margin-top: 15px;
+      font-size: 0.9rem;
+    }
+
+    /* Dark Mode */
+    body.dark {
+      background-color: #1f2937;
+      color: #ffffff;
+    }
+    body.dark .login-container {
+      background-color: #111827;
+    }
+    body.dark .input-field {
+      background-color: #1f2937;
+      border-color: #374151;
+      color: #ffffff;
+    }
+    body.dark .btn {
+      background-color: #f97316;
+      color: #ffffff;
+    }
+    body.dark .btn:hover {
+      background-color: #ea580c;
+    }
+    body.dark .error-message {
+      color: #f87171;
+    }
+
+    /* Light Mode */
+    body.light {
+      background-color: #f3f4f6;
+      color: #111827;
+    }
+    body.light .login-container {
+      background-color: #ffffff;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    body.light .input-field {
+      background-color: #ffffff;
+      border-color: #d1d5db;
+      color: #111827;
+    }
+    body.light .btn {
+      background-color: #f97316;
+      color: #ffffff;
+    }
+    body.light .btn:hover {
+      background-color: #ea580c;
+    }
+    body.light .error-message {
+      color: #dc2626;
+    }
+  </style>
 </head>
 <body>
-  <h1>Login</h1>
-  <form id="loginForm">
-    <input type="text" id="username" placeholder="Benutzername" required><br>
-    <input type="password" id="password" placeholder="Passwort" required><br>
-    <button type="submit">Login</button>
-  </form>
-  <p id="message" style="color:red;"></p>
+
+  <div class="login-container">
+    <h1>Zeitmanagement</h1>
+    <form id="loginForm">
+      <input type="text" id="username" placeholder="Benutzername" required class="input-field">
+      <input type="password" id="password" placeholder="Passwort" required class="input-field">
+      <button type="submit" class="btn">Login</button>
+    </form>
+    <p id="message" class="error-message"></p>
+  </div>
 
   <script>
+    // Dark/Light Mode automatisch setzen
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    document.body.classList.add(prefersDark ? 'dark' : 'light');
+
+    // Login-Logik
     const form = document.getElementById("loginForm");
     const message = document.getElementById("message");
 
@@ -35,10 +148,8 @@
           return;
         }
 
-        // Token speichern
         localStorage.setItem("token", data.token);
 
-        // Weiterleitung
         if (data.mustChangePassword) {
           window.location.href = "change-password.html";
         } else {
@@ -51,5 +162,6 @@
       }
     });
   </script>
+
 </body>
 </html>
