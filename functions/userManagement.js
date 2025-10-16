@@ -11,3 +11,42 @@ const users = [
   { username: "marcel", password: "Stadtwerke1", displayName: "Marcel Sander", role: "user" },
   { username: "yannik", password: "Stadtwerke1", displayName: "Yannik Siebert", role: "user" }
 ];
+export async function initKV(kv) {
+  for (const user of users) {
+    // Salt generieren
+    const salt = crypto.getRandomValues(new Uint8Array(16));
+    const enc = new TextEncoder();
+
+    // Passwort über PBKDF2 + SHA-256 hashen
+    const keyMaterial = await crypto.subtle.importKey(
+      "raw",
+      enc.encode(user.password),
+      "PBKDF2",
+      false,
+      ["deriveBits", "deriveKey"]
+    );
+
+    const key = await crypto.subtle.deriveKey(
+      { name: "PBKDF2", salt, iterations: 100000, hash: "SHA-256" },
+      keyMaterial,
+      { name: "AES-GCM", length: 256 },
+      true,
+      ["encrypt", "decrypt"]
+    );
+
+    const rawKey = await crypto.subtle.exportKey("raw", key);
+    const hash = btoa(String.fromCharCode(...new Uint8Array(rawKey)));
+    const saltStr = btoa(String.fromCharCode(...salt));
+
+    // Userdaten in KV speichern
+    await kv.put(`user:${user.username}`, JSON.stringify({
+      username: user.username,
+      passwordHash: hash,
+      salt: saltStr,
+      displayName: user.displayName,
+      role: user.role,
+      categories: { "LemGOesHANA": { immutable: true, entries: [] } },
+      mustChangePassword: true
+    }));
+  }
+}
