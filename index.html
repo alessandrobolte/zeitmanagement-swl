@@ -298,10 +298,11 @@ document.getElementById('logoutBtn').onclick = () => {
   if (confirm('Willst du dich wirklich ausloggen?')) {
     // Alle gespeicherten Daten, die beim Login nötig sind, entfernen
     localStorage.removeItem('token'); // falls du einen Login-Token hast
-    // Optional: aktive Kategorie oder Session-Daten löschen
     localStorage.removeItem('activeCategory');
     // Zur Login-Seite weiterleiten
     window.location.replace('login.html');
+  }
+};
 
 // ===== FORGOT TIMER =====
 document.getElementById('forgotBtn').onclick=()=>{showModal('Vergessene Zeit hinzufügen','<div class="form-row"><label>Dauer (Minuten)</label><input type="number" id="forgotMinutes" min="1" /></div><button id="addForgot" class="accent">Hinzufügen</button>'); document.getElementById('addForgot').onclick=()=>{
@@ -318,4 +319,5 @@ hideLoader();
 </div>
 </body>
 </html>
+
 
